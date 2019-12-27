@@ -1,0 +1,58 @@
+try {
+    timeout(time: 20, unit: 'MINUTES') {
+        
+        /*node('nodejs') {
+
+
+            stage('Build Angular App') {
+
+                sh 'ls -lrst'
+
+                sh 'cd helloworld-app/angularclient && npm install && npm run build'
+                stash name: 'workspace', excludes: 'angularclient/**'
+            }
+            
+        }*/
+
+        node('maven') {
+            stage('Checkout Application Source Code') {
+                sh 'ls -lrst'
+                git(url:"${APP_SOURCE_GIT_REPO}"
+                        , branch:'master')
+            }
+
+            stage('Build SpringBoot App') {
+                sh 'ls -lrst'
+                sh 'cd helloworld-app && mvn package'
+                //stash 'workspace'
+            }
+
+            stage('Build Docker Image and Create Image Stream') {
+                openshift.withCluster() {
+                    openshift.withProject() {
+
+                        echo 'Starting a dockerStrategy Build ...'
+                        //unstash 'workspace'
+                        sh 'ls -lrst'
+
+                        sh 'tar -cvf context.tar -C helloworld-app target/helloworld.jar Dockerfile'
+                        sh 'oc start-build helloworld-docker-image-build --from-archive=context.tar'
+                        //buildConfig = openshift.selector("bc", "${APP_NAME}").object()
+                        //buildConfig.startBuild()
+
+
+                    }
+                }
+            }
+        }
+
+
+
+    }
+} catch (err) {
+    echo "in catch block"
+    echo "Caught: ${err}"
+    currentBuild.result = 'FAILURE'
+    throw err
+}          
+

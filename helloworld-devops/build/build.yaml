@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-webhook-secret
+data:
+  WebHookSecretKey: aGVsbG93b3JsZC1zb3VyY2UtcmVwbw==
+  
+---
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: helloworld
+  name: helloworld-build-pipeline
+spec:
+  source:
+    git:
+      uri: "https://github.com/SagarOnline/openshift.git"
+    contextDir: "helloworld-app"
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: Jenkinsfile
+      env:
+        - name: APP_SOURCE_GIT_REPO
+          value: "https://github.com/SagarOnline/openshift.git"
+    type: JenkinsPipeline
+  triggers:
+    - type: GitHub
+      github:
+        secretReference:
+          name: github-webhook-secret
+    
+---
+apiVersion: v1
+kind: "BuildConfig"
+metadata:
+  name: "helloworld-docker-image-build"
+  labels:
+    app: helloworld
+spec:
+  runPolicy: "Serial"
+  source:
+    type: "Binary"
+  strategy:
+    type: "Docker"
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+      env:
+        - name: "BUILD_LOGLEVEL"
+          value: "5"
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "helloworld:v1"
+
+---
+apiVersion: v1
+kind: ImageStream
+metadata:
+  labels:
+    app: helloworld
+  name: helloworld

@@ -1,0 +1,34 @@
+try {
+    timeout(time: 20, unit: 'MINUTES') {
+        
+        node{
+		
+			stage('Checkout Application Source Code') {
+                sh 'ls -lrst'
+                git(url:"${params.APP_SOURCE_GIT_REPO}"
+                        , branch:'master')
+            }
+            stage('Deploy to a Dev Environment') {
+                openshift.withCluster() {
+                    openshift.withProject() {
+
+                        echo 'Starting a dockerStrategy Build ...'
+                        sh 'ls -lrst'
+
+                        sh 'tar -cvf context.tar -C helloworld-app target/helloworld.jar Dockerfile'
+                        sh 'oc apply -f helloworld-devops/rollout/dev/application.yaml'
+                    }
+                }
+            }
+        }
+
+
+
+    }
+} catch (err) {
+    echo "in catch block"
+    echo "Caught: ${err}"
+    currentBuild.result = 'FAILURE'
+    throw err
+}          
+

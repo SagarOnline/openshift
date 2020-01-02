@@ -12,10 +12,10 @@ try {
                 openshift.withCluster() {
                     openshift.withProject() {
 
-                        echo 'Starting a dockerStrategy Build ...'
+                        echo 'Deploying application ...'
                         sh 'ls -lrst'
 
-                        sh 'tar -cvf context.tar -C helloworld-app target/helloworld.jar Dockerfile'
+                        
                         sh 'oc apply -f helloworld-devops/rollout/dev/application.yaml'
                     }
                 }

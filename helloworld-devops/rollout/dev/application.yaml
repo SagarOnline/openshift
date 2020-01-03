@@ -13,6 +13,11 @@ spec:
     metadata:
       labels:
         app: helloworld
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/path: /actuator/metrics
+        prometheus.io/port: "8080"
     spec:
       containers:
         - image: helloworld:v1

@@ -43,6 +43,9 @@ kind: Service
 metadata:
   labels:
     app: helloworld
+  annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: http
   name: helloworld-svc
 spec:
   ports:

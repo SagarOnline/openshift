@@ -6,7 +6,7 @@ metadata:
     app: helloworld
   name: helloworld-dc
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     app: helloworld
   template:
